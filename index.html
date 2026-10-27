@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080808">
+  <title>One Question For You</title>
+  <style>
+    :root {
+      --bg: #080808;
+      --panel: #111111;
+      --gold: #d7bd83;
+      --gold-bright: #f0dca8;
+      --text: #f5f0e7;
+      --muted: #aaa39a;
+      --line: rgba(215,189,131,.25);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100svh; padding: 22px;
+      display: grid; place-items: center; overflow: hidden;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(215,189,131,.10), transparent 48%),
+        radial-gradient(ellipse at 100% 100%, rgba(215,189,131,.05), transparent 42%),
+        var(--bg);
+      color: var(--text);
+      font-family: "Avenir Next", Avenir, "Helvetica Neue", sans-serif;
+    }
+    .grain {
+      position: fixed; inset: 0; pointer-events: none; opacity: .10;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.24'/%3E%3C/svg%3E");
+    }
+    .frame {
+      width: min(100%, 560px); position: relative; z-index: 1;
+      border: 1px solid var(--line); background: rgba(14,14,14,.94);
+      padding: clamp(30px, 7vw, 62px) clamp(22px, 7vw, 58px);
+      text-align: center; box-shadow: 0 30px 100px rgba(0,0,0,.6);
+    }
+    .frame::before, .frame::after {
+      content: ""; position: absolute; width: 42px; height: 42px; border-color: var(--gold);
+      opacity: .7;
+    }
+    .frame::before { top: 12px; left: 12px; border-top: 1px solid; border-left: 1px solid; }
+    .frame::after { bottom: 12px; right: 12px; border-bottom: 1px solid; border-right: 1px solid; }
+    .monogram { color: var(--gold); font-family: Georgia, serif; font-size: 30px; margin-bottom: 24px; }
+    .eyebrow { text-transform: uppercase; letter-spacing: .28em; color: var(--gold); font-size: .68rem; line-height: 1.8; }
+    h1 {
+      font-family: Didot, "Bodoni 72", Georgia, serif; font-weight: 400;
+      font-size: clamp(2.8rem, 11vw, 4.7rem); letter-spacing: -.045em;
+      line-height: .98; margin: 23px 0 22px;
+    }
+    .rule { height: 1px; width: 64px; margin: 0 auto 23px; background: var(--gold); }
+    .copy { color: var(--muted); font-size: 1rem; line-height: 1.8; max-width: 355px; margin: 0 auto; }
+    .question { color: var(--text); font-family: Georgia, serif; font-size: clamp(1.4rem, 5vw, 1.8rem); margin-top: 29px; }
+    .buttons {
+      position: relative; min-height: 64px; margin: 27px auto 0;
+      display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
+    }
+    button {
+      border-radius: 0; min-height: 49px; padding: 13px 27px; font: inherit;
+      font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      cursor: pointer; transition: background .2s, color .2s, border-color .2s, transform .18s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 4px; }
+    #yesBtn { color: #0a0907; background: var(--gold); border: 1px solid var(--gold); }
+    #yesBtn:hover { background: var(--gold-bright); border-color: var(--gold-bright); transform: translateY(-2px); }
+    #noBtn { color: var(--text); background: transparent; border: 1px solid rgba(245,240,231,.35); }
+    #noBtn:hover { border-color: var(--gold); color: var(--gold); }
+    .footnote { margin-top: 32px; color: #70695f; font-size: .67rem; letter-spacing: .08em; }
+    .hidden { display: none !important; }
+    .success-mark { color: var(--gold); font-size: 42px; margin-bottom: 15px; }
+    .plan { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 17px 10px; margin: 25px auto 0; color: var(--gold-bright); line-height: 1.9; font-family: Georgia, serif; font-size: 1.08rem; }
+    .schedule { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 22px; text-align: left; }
+    .schedule label { display: block; color: var(--gold); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 8px; }
+    .schedule input { width: 100%; min-width: 0; color: var(--text); color-scheme: dark; background: #090909; border: 1px solid var(--line); border-radius: 0; padding: 12px 10px; font: inherit; }
+    .secondary { margin-top: 20px; color: var(--gold); border: 1px solid var(--line); background: transparent; }
+    .secondary:hover { background: rgba(215,189,131,.08); }
+    .toast { color: var(--gold); font-size: .85rem; margin-top: 13px; min-height: 1.3em; }
+    @media (max-width: 420px) {
+      body { padding: 14px; }
+      .frame { padding: 34px 22px; }
+      .buttons { gap: 10px; }
+      button { padding: 13px 18px; letter-spacing: .08em; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <main class="frame">
+    <section id="questionScreen">
+      <div class="monogram" aria-hidden="true">✦</div>
+      <div class="eyebrow">A little question · Just for you</div>
+      <h1>I'd love to<br>take you out.</h1>
+      <div class="rule"></div>
+      <p class="copy">An evening with good food, candlelight, and even better company. There's just one thing I'd like to know.</p>
+      <div class="question">Do you want to go out with me?</div>
+      <div class="buttons" id="buttonArea">
+        <button id="yesBtn">Yes, I'd love to</button>
+        <button id="noBtn">No, thank you</button>
+      </div>
+      <div class="footnote">NO PRESSURE. JUST A LITTLE ROMANCE.</div>
+    </section>
+
+    <section id="successScreen" class="hidden" aria-live="polite">
+      <div class="success-mark" aria-hidden="true">✦</div>
+      <div class="eyebrow">A lovely choice</div>
+      <h1>Then it's<br>a date.</h1>
+      <div class="rule"></div>
+      <p class="copy">I'll take care of the charm. You just bring that lovely smile.</p>
+      <div class="plan">A romantic dinner<br><span style="color:var(--muted);font-family:'Avenir Next',sans-serif;font-size:.85rem">Good food · Candlelight · A lovely evening</span></div>
+      <div class="schedule">
+        <div>
+          <label for="dateInput">Choose the date</label>
+          <input id="dateInput" type="date" aria-label="Choose the date">
+        </div>
+        <div>
+          <label for="timeInput">Choose the time</label>
+          <input id="timeInput" type="time" aria-label="Choose the time">
+        </div>
+      </div>
+      <button class="secondary" id="planBtn">Confirm our date</button>
+      <div class="toast" id="toast" aria-live="polite"></div>
+      <div class="footnote">SOME EVENINGS ARE WORTH LOOKING FORWARD TO.</div>
+      <button class="secondary" id="restartBtn" style="border-color:transparent;color:#827867">Start over</button>
+    </section>
+  </main>
+  <script>
+    const noBtn = document.getElementById('noBtn');
+    const buttonArea = document.getElementById('buttonArea');
+    const yesBtn = document.getElementById('yesBtn');
+    const questionScreen = document.getElementById('questionScreen');
+    const successScreen = document.getElementById('successScreen');
+    let dodgeCount = 0;
+
+    function moveNoButton() {
+      // Keep the playful dodge within the button area and visible on small screens.
+      const area = buttonArea.getBoundingClientRect();
+      const btn = noBtn.getBoundingClientRect();
+      const maxX = Math.max(0, Math.min(110, (area.width - btn.width) / 2));
+      const maxY = 44;
+      const x = (Math.random() * 2 - 1) * maxX;
+      const y = (Math.random() * 2 - 1) * maxY;
+      noBtn.style.position = 'relative';
+      noBtn.style.left = `${x}px`;
+      noBtn.style.top = `${y}px`;
+      dodgeCount++;
+      const lines = ["Almost got me.", "Nice try 😉", "Are you sure? 👀", "I'm feeling shy.", "That button has commitment issues."];
+      noBtn.textContent = lines[(dodgeCount - 1) % lines.length];
+    }
+
+    noBtn.addEventListener('pointerenter', moveNoButton);
+    noBtn.addEventListener('click', moveNoButton);
+    noBtn.addEventListener('touchstart', (event) => {
+      event.preventDefault();
+      moveNoButton();
+    }, { passive: false });
+
+    yesBtn.addEventListener('click', () => {
+      questionScreen.classList.add('hidden');
+      successScreen.classList.remove('hidden');
+    });
+
+    document.getElementById('planBtn').addEventListener('click', async () => {
+      const dateValue = document.getElementById('dateInput').value;
+      const timeValue = document.getElementById('timeInput').value;
+      const toast = document.getElementById('toast');
+      if (!dateValue || !timeValue) {
+        toast.textContent = "Choose both a date and a time first ✨";
+        return;
+      }
+      const date = new Date(dateValue + "T12:00:00");
+      const prettyDate = date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+      const [hour, minute] = timeValue.split(":").map(Number);
+      const prettyTime = new Date(2000, 0, 1, hour, minute).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+      const message = `It's a date ✨ Romantic dinner on ${prettyDate} at ${prettyTime}. Does that work for you?`;
+      if (navigator.share) {
+        try { await navigator.share({ title: "Then it's a date", text: message }); }
+        catch (e) { /* The share sheet was dismissed. */ }
+      } else if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(message);
+          toast.textContent = "Date details copied — send them in a message ✨";
+        } catch (e) {
+          window.prompt("Copy this date invitation:", message);
+        }
+      } else {
+        window.prompt("Copy this date invitation:", message);
+      }
+    });
+
+    document.getElementById('restartBtn').addEventListener('click', () => {
+      successScreen.classList.add('hidden');
+      questionScreen.classList.remove('hidden');
+      noBtn.textContent = "No, thank you";
+      noBtn.style.left = "0px";
+      noBtn.style.top = "0px";
+      dodgeCount = 0;
+    });
+  </script>
+</body>
+</html>
